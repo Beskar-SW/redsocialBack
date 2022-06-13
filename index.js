@@ -67,6 +67,14 @@ app.post("/login/:login", cors(), (req, res) => {
         const user = req.body.username;
         const password = req.body.password;
         const email = req.body.email;
+        //obtener ip del cliente
+        const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        //quitar los puntos de la ip
+        const ipSinPuntos = ip.lastIndexOf(":") > 0 ? ip.substring(ip.lastIndexOf(":") + 1) : ip;
+        console.log(ipSinPuntos);
+        //crear token aleatorio de 16 caracteres con mayusculas, minusculas y numeros
+        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        console.log(token);
 
         client.connect(err => {
             if (err) {
@@ -84,7 +92,7 @@ app.post("/login/:login", cors(), (req, res) => {
                     }
                     else {
                         //crear usuario
-                        collection.insertOne({ nombre: user, contraseña: encrypt(password), correo: email, foto: "predeterminada.jpg", eliminado: false }, (err, result) => {
+                        collection.insertOne({ nombre: user, contraseña: encrypt(password), correo: email, foto: "predeterminada.jpg", eliminado: false, ip: ipSinPuntos,token: token }, (err, result) => {
                             if (err) {
                                 console.error(err);
                                 res.sendStatus(500);
